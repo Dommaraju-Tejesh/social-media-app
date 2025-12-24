@@ -13,23 +13,28 @@ const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
+/* =========================
+   SOCKET.IO CONFIG (FIXED)
+========================= */
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "*",
+    origin: true,          // ✅ FIXED (no invalid headers)
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
-// store sockets by userId
+// Store sockets by userId
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
-  console.log("Socket connected", socket.id);
+  console.log("Socket connected:", socket.id);
 
   socket.on("join", (userId) => {
     onlineUsers.set(userId, socket.id);
@@ -50,26 +55,39 @@ io.on("connection", (socket) => {
         break;
       }
     }
-    console.log("Socket disconnected", socket.id);
+    console.log("Socket disconnected:", socket.id);
   });
 });
 
-// middleware
+/* =========================
+   MIDDLEWARE (FIXED CORS)
+========================= */
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: true,          // ✅ FIXED (works with credentials)
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+/* =========================
+   ROUTES
+========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/chats", chatRoutes);
 
+/* =========================
+   SERVER START
+========================= */
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
