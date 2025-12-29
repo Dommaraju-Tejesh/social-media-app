@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -14,7 +12,7 @@ const HomePage = () => {
   const [selectedPost, setSelectedPost] = useState(null);
 
   const fetchPosts = async () => {
-    const res = await api.get("/posts");
+    const res = await api.get("/api/posts");
     setPosts(res.data);
   };
 
@@ -28,7 +26,7 @@ const HomePage = () => {
     formData.append("text", text);
     if (image) formData.append("image", image);
 
-    await api.post("/posts", formData, {
+    await api.post("/api/posts", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -38,23 +36,22 @@ const HomePage = () => {
   };
 
   const handleLike = async (postId) => {
-    await api.post(`/posts/${postId}/like`);
+    await api.post(`/api/posts/${postId}/like`);
     fetchPosts();
   };
 
   const handleDelete = async (postId) => {
-    await api.delete(`/posts/${postId}`);
+    await api.delete(`/api/posts/${postId}`);
     fetchPosts();
   };
 
   const handleAddComment = async (postId, commentText) => {
-    await api.post(`/posts/${postId}/comments`, { text: commentText });
+    await api.post(`/api/posts/${postId}/comments`, { text: commentText });
     fetchPosts();
   };
 
   return (
     <div>
-      {/* ---------- Upload Post Box ---------- */}
       <div className="card p-3 mb-4 shadow-sm">
         <h4>Upload Post</h4>
 
@@ -77,9 +74,8 @@ const HomePage = () => {
         </button>
       </div>
 
-      {/* ---------- SHOW POSTS WITH COMMENTS BELOW EACH ONE ---------- */}
-      <div>
-        {Array.isArray(posts) && posts.map((post) => (
+      {Array.isArray(posts) &&
+        posts.map((post) => (
           <div key={post._id}>
             <PostCard
               post={post}
@@ -89,7 +85,6 @@ const HomePage = () => {
               currentUserId={user?._id}
             />
 
-            {/* Comment section appears under the clicked post */}
             {selectedPost?._id === post._id && (
               <CommentSection
                 post={selectedPost}
@@ -99,7 +94,6 @@ const HomePage = () => {
             )}
           </div>
         ))}
-      </div>
     </div>
   );
 };

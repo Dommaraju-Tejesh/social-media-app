@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://social-media-server-qki3.onrender.com/api",
+  baseURL: "https://social-media-server-qki3.onrender.com",
   withCredentials: true,
 });
-
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

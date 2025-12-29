@@ -17,10 +17,10 @@ const ProfilePage = () => {
   const [selectedPost, setSelectedPost] = useState(null);
 
   const fetchProfile = async () => {
-    const res = await api.get(`/users/${id}/profile`);
+    const res = await api.get(`/api/users/${id}/profile`);
     setProfile(res.data || null);
 
-    const postsRes = await api.get(`/posts/user/${id}`);
+    const postsRes = await api.get(`/api/posts/user/${id}`);
     setPosts(Array.isArray(postsRes.data) ? postsRes.data : []);
   };
 
@@ -29,32 +29,32 @@ const ProfilePage = () => {
   }, [id]);
 
   const handleLike = async (postId) => {
-    await api.post(`/posts/${postId}/like`);
+    await api.post(`/api/posts/${postId}/like`);
     fetchProfile();
   };
 
   const handleDelete = async (postId) => {
-    await api.delete(`/posts/${postId}`);
+    await api.delete(`/api/posts/${postId}`);
     fetchProfile();
   };
 
   const handleAddComment = async (postId, commentText) => {
-    await api.post(`/posts/${postId}/comments`, { text: commentText });
+    await api.post(`/api/posts/${postId}/comments`, { text: commentText });
     fetchProfile();
   };
 
   const followUser = async (userId) => {
-    await api.post(`/users/${userId}/follow`);
+    await api.post(`/api/users/${userId}/follow`);
     fetchProfile();
   };
 
   const unfollowUser = async (userId) => {
-    await api.post(`/users/${userId}/unfollow`);
+    await api.post(`/api/users/${userId}/unfollow`);
     fetchProfile();
   };
 
   const handleSearch = async () => {
-    const res = await api.get(`/users/search?query=${search}`);
+    const res = await api.get(`/api/users/search?query=${search}`);
     setSearchResults(Array.isArray(res.data) ? res.data : []);
   };
 
@@ -64,7 +64,7 @@ const ProfilePage = () => {
     const formData = new FormData();
     formData.append("avatar", avatarFile);
 
-    await api.post("/users/avatar", formData, {
+    await api.post("/api/users/avatar", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -237,4 +237,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
