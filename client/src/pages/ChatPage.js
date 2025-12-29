@@ -4,7 +4,7 @@ import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket = io(process.env.REACT_APP_API_BASE_URL);
 
 const ChatPage = () => {
   const { userId } = useParams(); // other user

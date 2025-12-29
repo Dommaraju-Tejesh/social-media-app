@@ -16,20 +16,35 @@ const SignupPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (form.password !== form.confirmPassword) {
-        return setError("Passwords do not match");
-      }
+    setError("");
 
-      await api.post("/auth/signup", form);
+    if (form.password !== form.confirmPassword) {
+      return setError("Passwords do not match");
+    }
+
+    if (!form.agree) {
+      return setError("Please agree to terms and conditions");
+    }
+
+    try {
+      // ✅ SEND ONLY WHAT BACKEND EXPECTS
+      await api.post("/api/auth/signup", {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      });
+
       navigate("/login");
     } catch (err) {
-      setError("Signup failed");
+      setError(err.response?.data?.message || "Signup failed");
     }
   };
 
@@ -48,6 +63,7 @@ const SignupPage = () => {
             name="username"
             value={form.username}
             onChange={handleChange}
+            required
           />
 
           <label className="form-label">Email</label>
@@ -57,6 +73,7 @@ const SignupPage = () => {
             name="email"
             value={form.email}
             onChange={handleChange}
+            required
           />
 
           <label className="form-label">Password</label>
@@ -66,6 +83,7 @@ const SignupPage = () => {
             name="password"
             value={form.password}
             onChange={handleChange}
+            required
           />
 
           <label className="form-label">Confirm Password</label>
@@ -75,6 +93,7 @@ const SignupPage = () => {
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}
+            required
           />
 
           <div className="form-check mb-3">
@@ -85,7 +104,9 @@ const SignupPage = () => {
               checked={form.agree}
               onChange={handleChange}
             />
-            <label className="form-check-label">Agree to terms and conditions</label>
+            <label className="form-check-label">
+              Agree to terms and conditions
+            </label>
           </div>
 
           <button className="btn btn-success w-100">Signup</button>

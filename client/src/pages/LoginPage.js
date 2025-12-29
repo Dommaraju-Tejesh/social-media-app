@@ -20,7 +20,7 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const res = await api.post("/auth/login", form);
+      const res = await api.post("/api/auth/login", form);
       // backend returns: { token, user }
       login(res.data.user, res.data.token);
       navigate("/");

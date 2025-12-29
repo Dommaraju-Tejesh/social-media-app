@@ -79,7 +79,7 @@ const HomePage = () => {
 
       {/* ---------- SHOW POSTS WITH COMMENTS BELOW EACH ONE ---------- */}
       <div>
-        {posts.map((post) => (
+        {Array.isArray(posts) && posts.map((post) => (
           <div key={post._id}>
             <PostCard
               post={post}

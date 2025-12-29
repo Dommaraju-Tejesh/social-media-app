@@ -16,7 +16,7 @@ const ChatListPage = () => {
   return (
     <div style={{ maxWidth: 600, margin: "20px auto" }}>
       <h2>Chat Users</h2>
-      {users.map((u) => (
+      {Array.isArray(users) && users.map((u) => (
         <div key={u._id} style={{ borderBottom: "1px solid #ddd", padding: 5 }}>
           {u.username}
           <Link to={`/chat/${u._id}`} style={{ marginLeft: 10 }}>
