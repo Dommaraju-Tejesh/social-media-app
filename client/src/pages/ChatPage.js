@@ -14,12 +14,14 @@ const ChatPage = () => {
   const messagesEndRef = useRef();
 
   useEffect(() => {
-    socket.emit("join", user._id);
-  }, [user._id]);
+    if (user?._id) {
+      socket.emit("join", user._id);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchChat = async () => {
-      const res = await api.get(`/api/chats/${userId}`);
+      const res = await api.get(`/chats/${userId}`); // ✅ FIXED
       setChat(res.data);
     };
     fetchChat();
@@ -28,7 +30,10 @@ const ChatPage = () => {
   const sendMessage = async () => {
     if (!text.trim() || !chat) return;
 
-    const res = await api.post(`/api/chats/${chat._id}/messages`, { text });
+    const res = await api.post(
+      `/chats/${chat._id}/messages`, // ✅ FIXED
+      { text }
+    );
 
     socket.emit("sendMessage", {
       chatId: chat._id,
