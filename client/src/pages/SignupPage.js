@@ -36,7 +36,7 @@ const SignupPage = () => {
 
     try {
       // ✅ SEND ONLY WHAT BACKEND EXPECTS
-      await api.post("/api/auth/signup", {
+      await api.post("/auth/signup", {
         username: form.username,
         email: form.email,
         password: form.password,
