@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // ✅ ADDED Link
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import PostCard from "../components/PostCard";
@@ -185,8 +185,12 @@ const ProfilePage = () => {
                   profile.following.some((x) => x._id === u._id);
 
                 return (
-                  <div key={u._id} className="mb-2">
-                    <strong>{u.username}</strong>{" "}
+                  <div
+                    key={u._id}
+                    className="mb-2 d-flex align-items-center"
+                  >
+                    <strong>{u.username}</strong>
+
                     {u._id !== user?._id &&
                       (iFollow ? (
                         <button
@@ -203,6 +207,15 @@ const ProfilePage = () => {
                           Follow
                         </button>
                       ))}
+
+                    {/* ✅ ADDED CHAT BUTTON */}
+                    {u._id !== user?._id && (
+                      <Link to={`/chat/${u._id}`} className="ms-2">
+                        <button className="btn btn-primary btn-sm">
+                          Chat
+                        </button>
+                      </Link>
+                    )}
                   </div>
                 );
               })}
