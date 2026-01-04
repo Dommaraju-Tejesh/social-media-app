@@ -12,7 +12,7 @@ const HomePage = () => {
   const [selectedPost, setSelectedPost] = useState(null);
 
   const fetchPosts = async () => {
-    const res = await api.get("/api/posts");
+    const res = await api.get("/posts"); // ✅ FIXED
     setPosts(res.data);
   };
 
@@ -26,7 +26,7 @@ const HomePage = () => {
     formData.append("text", text);
     if (image) formData.append("image", image);
 
-    await api.post("/api/posts", formData, {
+    await api.post("/posts", formData, { // ✅ FIXED
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -36,17 +36,17 @@ const HomePage = () => {
   };
 
   const handleLike = async (postId) => {
-    await api.post(`/api/posts/${postId}/like`);
+    await api.post(`/posts/${postId}/like`); // ✅ FIXED
     fetchPosts();
   };
 
   const handleDelete = async (postId) => {
-    await api.delete(`/api/posts/${postId}`);
+    await api.delete(`/posts/${postId}`); // ✅ FIXED
     fetchPosts();
   };
 
   const handleAddComment = async (postId, commentText) => {
-    await api.post(`/api/posts/${postId}/comments`, { text: commentText });
+    await api.post(`/posts/${postId}/comments`, { text: commentText }); // ✅ FIXED
     fetchPosts();
   };
 
@@ -99,3 +99,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
