@@ -9,13 +9,14 @@ const {
   unfollowUser,
   getUserProfile,
 } = require("../controllers/userController");
+
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload"); // ✅ Cloudinary upload
+const upload = require("../middleware/upload"); // ✅ CLOUDINARY
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
 
-// ✅ USE CLOUDINARY (NOT DISK STORAGE)
+// ✅ USE CLOUDINARY (NOT DISK)
 router.post("/avatar", protect, upload.single("avatar"), uploadAvatar);
 
 router.get("/search", protect, searchUsers);
