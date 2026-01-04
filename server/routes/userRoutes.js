@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
   getMe,
   updateProfile,
@@ -12,14 +11,11 @@ const {
 } = require("../controllers/userController");
 
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload"); // ✅ CLOUDINARY MULTER
+const upload = require("../middleware/upload"); // ✅ CLOUDINARY
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
-
-// ✅ FIXED: Cloudinary upload middleware
 router.post("/avatar", protect, upload.single("avatar"), uploadAvatar);
-
 router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);
