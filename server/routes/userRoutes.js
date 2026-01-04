@@ -15,7 +15,7 @@ const upload = require("../middleware/upload"); // ✅ Cloudinary upload
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
 
-// ✅ CLOUDINARY avatar upload
+// ✅ USE CLOUDINARY (NOT DISK STORAGE)
 router.post("/avatar", protect, upload.single("avatar"), uploadAvatar);
 
 router.get("/search", protect, searchUsers);

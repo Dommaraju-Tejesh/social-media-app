@@ -24,6 +24,7 @@ exports.updateProfile = async (req, res) => {
 };
 
 // POST /api/users/avatar  (multer handles req.file)
+// POST /api/users/avatar
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
@@ -31,7 +32,10 @@ exports.uploadAvatar = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-    user.avatar = req.file.path; // ✅ Cloudinary URL
+
+    // ✅ Cloudinary gives FULL URL
+    user.avatar = req.file.path;
+
     await user.save();
 
     res.json({ avatar: user.avatar });
