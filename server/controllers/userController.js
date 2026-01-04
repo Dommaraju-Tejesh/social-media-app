@@ -26,10 +26,15 @@ exports.updateProfile = async (req, res) => {
 // POST /api/users/avatar  (multer handles req.file)
 exports.uploadAvatar = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "No file" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
     const user = await User.findById(req.user._id);
-    user.avatar = `/uploads/${req.file.filename}`;
+
+    // ✅ Cloudinary gives full public URL
+    user.avatar = req.file.path;
+
     await user.save();
 
     res.json({ avatar: user.avatar });
@@ -38,6 +43,7 @@ exports.uploadAvatar = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // GET /api/users/search?query=...
 exports.searchUsers = async (req, res) => {
