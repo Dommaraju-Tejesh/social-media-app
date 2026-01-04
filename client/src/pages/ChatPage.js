@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -7,82 +7,113 @@ import { io } from "socket.io-client";
 const socket = io("https://social-media-server-qki3.onrender.com");
 
 const ChatPage = () => {
-  const { userId } = useParams();
+  const { userId } = useParams(); // other user
   const { user } = useAuth();
-
   const [chat, setChat] = useState(null);
   const [text, setText] = useState("");
-  const [error, setError] = useState("");
+  const messagesEndRef = useRef(null);
 
+  const scrollBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // join socket room
   useEffect(() => {
     if (user?._id) {
       socket.emit("join", user._id);
     }
   }, [user]);
 
+  // fetch or create chat (LOAD OLD MESSAGES)
   useEffect(() => {
     const fetchChat = async () => {
       try {
-        const res = await api.get(`/chats/${userId}`);
+        const res = await api.get(`/chats/${userId}`); // ✅ CORRECT
         setChat(res.data);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load chat");
+        console.error("Failed to load chat", err);
       }
     };
     fetchChat();
   }, [userId]);
 
+  // receive realtime messages
+  useEffect(() => {
+    socket.on("receiveMessage", (msg) => {
+      setChat((prev) =>
+        prev && prev._id === msg.chatId
+          ? {
+              ...prev,
+              messages: [
+                ...prev.messages,
+                { text: msg.text, sender: { _id: msg.from } },
+              ],
+            }
+          : prev
+      );
+      scrollBottom();
+    });
+
+    return () => socket.off("receiveMessage");
+  }, []);
+
+  useEffect(scrollBottom, [chat]);
+
   const sendMessage = async () => {
     if (!text.trim() || !chat) return;
 
-    try {
-      const res = await api.post(
-        `/chats/${chat._id}/messages`,
-        { text }
-      );
+    const res = await api.post(`/chats/${chat._id}/messages`, { text });
 
-      socket.emit("sendMessage", {
-        chatId: chat._id,
-        from: user._id,
-        to: userId,
-        text,
-      });
+    setChat({
+      ...chat,
+      messages: [
+        ...chat.messages,
+        { ...res.data, sender: { _id: user._id } },
+      ],
+    });
 
-      setChat({
-        ...chat,
-        messages: [...chat.messages, res.data],
-      });
-      setText("");
-    } catch (err) {
-      console.error(err);
-      alert("Message failed");
-    }
+    socket.emit("sendMessage", {
+      chatId: chat._id,
+      from: user._id,
+      to: userId,
+      text,
+    });
+
+    setText("");
   };
 
-  if (error) return <div>{error}</div>;
   if (!chat) return <div>Loading...</div>;
 
   return (
-    <div style={{ maxWidth: 600, margin: "20px auto" }}>
-      <h3>Chat</h3>
+    <div style={{ maxWidth: 800, margin: "20px auto" }}>
+      <h2>Chat</h2>
 
-      <div style={{ minHeight: 300, border: "1px solid #ddd", padding: 10 }}>
-        {chat.messages.map((m, i) => (
-          <div key={i}>
-            <strong>{m.sender?.username || "User"}:</strong> {m.text}
+      <div
+        style={{
+          border: "1px solid #ddd",
+          minHeight: 300,
+          maxHeight: 400,
+          overflowY: "auto",
+          padding: 10,
+          marginBottom: 10,
+        }}
+      >
+        {chat.messages.map((m, idx) => (
+          <div key={idx} style={{ marginBottom: 6 }}>
+            <strong>{m.sender._id === user._id ? "You" : "Them"}:</strong>{" "}
+            {m.text}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div style={{ display: "flex", marginTop: 10 }}>
-        <input
-          style={{ flex: 1 }}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type a message..."
+        style={{ width: "80%", marginRight: 6 }}
+      />
+      <button onClick={sendMessage}>Send</button>
     </div>
   );
 };

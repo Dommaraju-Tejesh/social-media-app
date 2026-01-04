@@ -8,7 +8,7 @@ const ChatListPage = () => {
   useEffect(() => {
     const fetchChatUsers = async () => {
       try {
-        const res = await api.get("/api/chats"); // ✅ FIXED
+        const res = await api.get("/chats"); // ✅ CORRECT
         setUsers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Failed to load chat users", err);
@@ -25,10 +25,7 @@ const ChatListPage = () => {
       {users.length === 0 && <p>No users to chat with</p>}
 
       {users.map((u) => (
-        <div
-          key={u._id}
-          style={{ borderBottom: "1px solid #ddd", padding: 8 }}
-        >
+        <div key={u._id} style={{ borderBottom: "1px solid #ddd", padding: 8 }}>
           <strong>{u.username}</strong>
 
           <Link to={`/chat/${u._id}`} style={{ marginLeft: 10 }}>
