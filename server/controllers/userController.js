@@ -23,8 +23,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// POST /api/users/avatar  (multer handles req.file)
-// POST /api/users/avatar
+
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
@@ -33,20 +32,17 @@ exports.uploadAvatar = async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    // ✅ Cloudinary gives FULL URL
-    user.avatar = req.file.path;
+    // ✅ ALWAYS USE secure_url
+    user.avatar = req.file.secure_url || req.file.path;
 
     await user.save();
 
     res.json({ avatar: user.avatar });
   } catch (err) {
-    console.error("Avatar upload error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("UPLOAD AVATAR ERROR:", err);
+    res.status(500).json({ message: "Avatar upload failed" });
   }
 };
-
-
-
 
 // GET /api/users/search?query=...
 exports.searchUsers = async (req, res) => {
