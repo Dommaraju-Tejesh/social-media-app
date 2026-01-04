@@ -7,20 +7,32 @@ const ChatListPage = () => {
 
   useEffect(() => {
     const fetchChatUsers = async () => {
-      const res = await api.get("/chats");
-      setUsers(res.data);
+      try {
+        const res = await api.get("/api/chats"); // ✅ FIXED
+        setUsers(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Failed to load chat users", err);
+      }
     };
+
     fetchChatUsers();
   }, []);
 
   return (
     <div style={{ maxWidth: 600, margin: "20px auto" }}>
       <h2>Chat Users</h2>
-      {Array.isArray(users) && users.map((u) => (
-        <div key={u._id} style={{ borderBottom: "1px solid #ddd", padding: 5 }}>
-          {u.username}
+
+      {users.length === 0 && <p>No users to chat with</p>}
+
+      {users.map((u) => (
+        <div
+          key={u._id}
+          style={{ borderBottom: "1px solid #ddd", padding: 8 }}
+        >
+          <strong>{u.username}</strong>
+
           <Link to={`/chat/${u._id}`} style={{ marginLeft: 10 }}>
-            Open Chat
+            <button className="btn btn-sm btn-primary">Open Chat</button>
           </Link>
         </div>
       ))}
@@ -29,3 +41,4 @@ const ChatListPage = () => {
 };
 
 export default ChatListPage;
+

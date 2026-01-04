@@ -14,14 +14,12 @@ const ChatPage = () => {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
 
-  // join socket room
   useEffect(() => {
     if (user?._id) {
       socket.emit("join", user._id);
     }
   }, [user]);
 
-  // fetch or create chat
   useEffect(() => {
     const fetchChat = async () => {
       try {
@@ -32,7 +30,6 @@ const ChatPage = () => {
         setError("Unable to load chat");
       }
     };
-
     fetchChat();
   }, [userId]);
 
@@ -56,7 +53,6 @@ const ChatPage = () => {
         ...chat,
         messages: [...chat.messages, res.data],
       });
-
       setText("");
     } catch (err) {
       console.error(err);
