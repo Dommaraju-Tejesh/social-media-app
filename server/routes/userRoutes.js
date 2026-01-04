@@ -9,9 +9,8 @@ const {
   unfollowUser,
   getUserProfile,
 } = require("../controllers/userController");
-
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload"); // ✅ CLOUDINARY
+const upload = require("../middleware/upload"); // ✅ FIX
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
