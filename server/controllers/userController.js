@@ -32,7 +32,7 @@ exports.uploadAvatar = async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    // ✅ Cloudinary gives full public URL
+    // ✅ CLOUDINARY URL
     user.avatar = req.file.path;
 
     await user.save();
@@ -43,6 +43,7 @@ exports.uploadAvatar = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 // GET /api/users/search?query=...
