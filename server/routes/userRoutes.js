@@ -9,13 +9,15 @@ const {
   unfollowUser,
   getUserProfile,
 } = require("../controllers/userController");
-
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload"); // ✅ Cloudinary
+const upload = require("../middleware/upload"); // ✅ Cloudinary upload
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
+
+// ✅ CLOUDINARY avatar upload
 router.post("/avatar", protect, upload.single("avatar"), uploadAvatar);
+
 router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);
