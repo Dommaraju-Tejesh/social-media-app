@@ -5,7 +5,6 @@ const { Server } = require("socket.io");
 const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const path = require("path");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
@@ -20,17 +19,16 @@ const app = express();
 const server = http.createServer(app);
 
 /* =========================
-   SOCKET.IO CONFIG (FIXED)
+   SOCKET.IO CONFIG
 ========================= */
 const io = new Server(server, {
   cors: {
-    origin: true,          // ✅ FIXED (no invalid headers)
+    origin: true,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-// Store sockets by userId
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
@@ -38,7 +36,6 @@ io.on("connection", (socket) => {
 
   socket.on("join", (userId) => {
     onlineUsers.set(userId, socket.id);
-    console.log("User joined:", userId);
   });
 
   socket.on("sendMessage", ({ chatId, from, to, text }) => {
@@ -55,16 +52,15 @@ io.on("connection", (socket) => {
         break;
       }
     }
-    console.log("Socket disconnected:", socket.id);
   });
 });
 
 /* =========================
-   MIDDLEWARE (FIXED CORS)
+   MIDDLEWARE
 ========================= */
 app.use(
   cors({
-    origin: true,          // ✅ FIXED (works with credentials)
+    origin: true,
     credentials: true,
   })
 );
@@ -72,7 +68,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* =========================
    ROUTES

@@ -31,18 +31,16 @@ exports.uploadAvatar = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-
-    // ✅ CLOUDINARY URL
-    user.avatar = req.file.path;
-
+    user.avatar = req.file.path; // ✅ Cloudinary URL
     await user.save();
 
     res.json({ avatar: user.avatar });
   } catch (err) {
-    console.error(err);
+    console.error("Avatar upload error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 
