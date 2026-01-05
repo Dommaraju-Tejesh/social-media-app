@@ -14,7 +14,8 @@ const upload = require("../middleware/upload"); // ✅ FIX
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
-router.post("/avatar", protect, upload.single("image"), uploadAvatar);
+// This tells the server to accept either "image" OR "avatar"
+router.post("/avatar", protect, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), uploadAvatar);
 router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);

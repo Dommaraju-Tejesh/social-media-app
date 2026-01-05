@@ -26,16 +26,22 @@ exports.updateProfile = async (req, res) => {
 
 exports.uploadAvatar = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file received. Check field name." });
+    // Check both possible field names
+    const file = (req.files && req.files.image) ? req.files.image[0] : 
+                 (req.files && req.files.avatar) ? req.files.avatar[0] : 
+                 req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file received. Check field names." });
     }
+
     const user = await User.findById(req.user._id);
-    user.avatar = req.file.path || req.file.secure_url;
+    user.avatar = file.path; 
     await user.save();
+
     res.json({ avatar: user.avatar });
   } catch (err) {
-    // This will print the actual text error (like "Invalid API Key") in Render
-    console.error("UPLOAD ERROR:", err.message || err);
+    console.error("UPLOAD ERROR:", err.message);
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
