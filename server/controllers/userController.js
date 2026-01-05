@@ -27,26 +27,16 @@ exports.updateProfile = async (req, res) => {
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded. Check field name." });
+      return res.status(400).json({ message: "No file received. Check field name." });
     }
-
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Cloudinary path
     user.avatar = req.file.path || req.file.secure_url;
     await user.save();
-
     res.json({ avatar: user.avatar });
   } catch (err) {
-    // THIS IS THE MOST IMPORTANT PART:
-    console.error("CLOUDINARY ERROR DETAILS:", err); 
-    console.log("Error Message:", err.message);
-    
-    res.status(500).json({ 
-      message: "Server Error during upload", 
-      error: err.message // This sends the text error to your browser console
-    });
+    // This will print the actual text error (like "Invalid API Key") in Render
+    console.error("UPLOAD ERROR:", err.message || err);
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
 
