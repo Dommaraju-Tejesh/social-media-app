@@ -47,11 +47,13 @@ exports.uploadAvatar = async (req, res) => {
     res.json({ message: "Avatar updated", avatar: user.avatar });
 
   } catch (err) {
-    // This will now print the actual error text in Render Logs
-    console.error("UPLOAD AVATAR ERROR:", err.message);
+    // This forces the full error object to show in Render logs
+    console.error("DETAILED UPLOAD ERROR:", JSON.stringify(err, null, 2));
+    console.error("ERROR MESSAGE:", err.message);
+    
     res.status(500).json({ 
       message: "Avatar upload failed", 
-      error: err.message 
+      details: err.message 
     });
   }
 };
