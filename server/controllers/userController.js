@@ -26,21 +26,33 @@ exports.updateProfile = async (req, res) => {
 
 exports.uploadAvatar = async (req, res) => {
   try {
+    // 1. Check if Multer actually received the file
     if (!req.file) {
+      console.error("Upload Error: No file provided in request");
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const user = await User.findById(req.user._id);
+    // 2. Log the file path to verify Cloudinary responded
+    console.log("File uploaded to Cloudinary:", req.file.path);
 
-    // ✅ ALWAYS USE secure_url
-    user.avatar = req.file.secure_url || req.file.path;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Use path or secure_url provided by CloudinaryStorage
+    user.avatar = req.file.path || req.file.secure_url;
 
     await user.save();
+    res.json({ message: "Avatar updated", avatar: user.avatar });
 
-    res.json({ avatar: user.avatar });
   } catch (err) {
-    console.error("UPLOAD AVATAR ERROR:", err);
-    res.status(500).json({ message: "Avatar upload failed" });
+    // This will now print the actual error text in Render Logs
+    console.error("UPLOAD AVATAR ERROR:", err.message);
+    res.status(500).json({ 
+      message: "Avatar upload failed", 
+      error: err.message 
+    });
   }
 };
 
