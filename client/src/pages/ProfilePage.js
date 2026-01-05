@@ -62,13 +62,22 @@ const ProfilePage = () => {
     if (!avatarFile) return;
 
     const formData = new FormData();
-    formData.append("avatar", avatarFile);
+    // Use "image" to match your backend's upload.single("image")
+    formData.append("image", avatarFile); 
 
-    await api.post("/users/avatar", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    fetchProfile();
+    try {
+      await api.post("/users/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      
+      // Clear the selection and refresh
+      setAvatarFile(null);
+      fetchProfile();
+      alert("Profile picture updated!");
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed. Please check the console for details.");
+    }
   };
 
   if (!profile) return <div>Loading...</div>;
