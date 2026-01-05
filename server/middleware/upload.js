@@ -4,15 +4,12 @@ const cloudinary = require("../config/cloudinary");
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: "social-media-posts",
-      // Removing 'allowed_formats' temporarily to see if it bypasses the crash
-      public_id: `avatar-${Date.now()}`,
-    };
+  params: {
+    folder: "social-media-posts",
+    // Adding webp and letting cloudinary handle auto-formatting
+    allowed_formats: ["jpg", "jpeg", "png", "webp"], 
   },
 });
 
 const upload = multer({ storage });
-
 module.exports = upload;

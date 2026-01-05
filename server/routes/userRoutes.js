@@ -14,7 +14,7 @@ const upload = require("../middleware/upload"); // ✅ FIX
 
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
-router.post("/avatar", protect, upload.single("avatar"), uploadAvatar);
+router.post("/avatar", protect, upload.single("image"), uploadAvatar);
 router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);
