@@ -4,8 +4,9 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
 
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js"; // ✅ ADD THIS LINE
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -15,3 +16,4 @@ root.render(
     </AuthProvider>
   </BrowserRouter>
 );
+
