@@ -3,17 +3,23 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
+import { AuthFlowProvider } from "./context/AuthFlowContext";
 import "./index.css";
+import "./App.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; // ✅ ADD THIS LINE
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <BrowserRouter>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </BrowserRouter>
-);
 
+root.render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <AuthFlowProvider>
+          <App />
+        </AuthFlowProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);

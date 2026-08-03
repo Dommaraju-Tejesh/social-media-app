@@ -8,16 +8,31 @@ import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import ChatListPage from "./pages/ChatListPage";
 import ChatPage from "./pages/ChatPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import SettingsPage from "./pages/SettingsPage";
+import AdminPage from "./pages/AdminPage";
+import BannedPage from "./pages/BannedPage";
+import { useLocation } from "react-router-dom";
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
-  return user ? children : <Navigate to="/login" />;
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.isBanned) {
+    return <Navigate to="/banned" replace />;
+  }
+
+  return children;
 };
 
 const App = () => {
+  const location = useLocation();
   return (
     <>
-      <Navbar />
+      {location.pathname !== "/banned" && <Navbar />}
       <Routes>
         <Route
           path="/"
@@ -28,7 +43,9 @@ const App = () => {
           }
         />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/banned" element={<BannedPage />} />
         <Route
           path="/profile/:id"
           element={
@@ -50,6 +67,22 @@ const App = () => {
           element={
             <PrivateRoute>
               <ChatPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <SettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPage />
             </PrivateRoute>
           }
         />

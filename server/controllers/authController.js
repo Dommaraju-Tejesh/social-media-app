@@ -40,10 +40,9 @@ exports.signup = async (req, res) => {
 };
 
 // POST /api/auth/login
-// 🔥 NO OTP / PASScode HERE – ONLY EMAIL + PASSWORD
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body; // <- only these
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res
@@ -52,16 +51,16 @@ exports.login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-
-    // No 2FA check at all anymore
 
     res.json({
       token: generateToken(user._id),
@@ -69,6 +68,9 @@ exports.login = async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar,
+        isAdmin: user.isAdmin,
+        isBanned: user.isBanned,
         twoFactorEnabled: user.twoFactorEnabled,
       },
     });
@@ -78,7 +80,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// POST /api/auth/enable-2fa (still here but NOT used by login)
+// POST /api/auth/enable-2fa
 exports.enable2FA = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -100,5 +102,46 @@ exports.enable2FA = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// POST /api/auth/forgot-password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email, answer, newPassword } = req.body;
+
+    if (!email || !answer || !newPassword) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    if (answer.trim().toLowerCase() !== "pulli") {
+      return res.status(400).json({
+        message: "Friend verification failed",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 };

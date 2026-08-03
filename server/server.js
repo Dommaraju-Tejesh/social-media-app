@@ -12,6 +12,8 @@ const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
+const adminRoutes = require("./routes/adminRoutes");
+
 // Connect to MongoDB
 connectDB();
 
@@ -21,6 +23,7 @@ const server = http.createServer(app);
 /* =========================
    SOCKET.IO CONFIG
 ========================= */
+
 const io = new Server(server, {
   cors: {
     origin: true,
@@ -29,26 +32,72 @@ const io = new Server(server, {
   },
 });
 
+// userId -> { socketId, lastSeen }
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
+  // =========================
+  // USER JOIN
+  // =========================
   socket.on("join", (userId) => {
-    onlineUsers.set(userId, socket.id);
+    onlineUsers.set(userId, {
+      socketId: socket.id,
+      lastSeen: null,
+    });
+
+    console.log(`${userId} is online`);
+
+    socket.broadcast.emit("userOnline", userId);
   });
 
-  socket.on("sendMessage", ({ chatId, from, to, text }) => {
-    const toSocketId = onlineUsers.get(to);
-    if (toSocketId) {
-      io.to(toSocketId).emit("receiveMessage", { chatId, from, text });
+  // =========================
+  // SEND MESSAGE
+  // =========================
+  socket.on("sendMessage", (message) => {
+    const receiver = onlineUsers.get(message.to);
+
+    if (receiver) {
+      io.to(receiver.socketId).emit("receiveMessage", message);
+
+      io.to(receiver.socketId).emit("refreshChatList");
+    }
+
+    socket.emit("refreshChatList");
+  });
+
+  // =========================
+  // MESSAGE SEEN
+  // =========================
+  socket.on("messageSeen", ({ to, from, messageId }) => {
+    const receiver = onlineUsers.get(to);
+
+    if (receiver) {
+      io.to(receiver.socketId).emit("messageSeen", {
+        from,
+        messageId,
+      });
     }
   });
 
+  // =========================
+  // DISCONNECT
+  // =========================
   socket.on("disconnect", () => {
-    for (const [userId, sockId] of onlineUsers.entries()) {
-      if (sockId === socket.id) {
+    for (const [userId, data] of onlineUsers.entries()) {
+      if (data.socketId === socket.id) {
+        data.lastSeen = new Date();
+
         onlineUsers.delete(userId);
+
+        console.log(`${userId} went offline`);
+
+        socket.broadcast.emit("userOffline", {
+          userId,
+          lastSeen: data.lastSeen,
+        });
+
         break;
       }
     }
@@ -62,7 +111,7 @@ app.use(
   cors({
     origin: true,
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -76,6 +125,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/chats", chatRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* =========================
    SERVER START
@@ -85,4 +135,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-

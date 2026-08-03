@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Post = require("../models/Post");
+const Chat = require("../models/Chat");
 const path = require("path");
 
 // GET /api/users/me
@@ -23,20 +25,24 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
 exports.uploadAvatar = async (req, res) => {
   try {
     // Check both possible field names
-    const file = (req.files && req.files.image) ? req.files.image[0] : 
-                 (req.files && req.files.avatar) ? req.files.avatar[0] : 
-                 req.file;
+    const file =
+      req.files && req.files.image
+        ? req.files.image[0]
+        : req.files && req.files.avatar
+          ? req.files.avatar[0]
+          : req.file;
 
     if (!file) {
-      return res.status(400).json({ message: "No file received. Check field names." });
+      return res
+        .status(400)
+        .json({ message: "No file received. Check field names." });
     }
 
     const user = await User.findById(req.user._id);
-    user.avatar = file.path; 
+    user.avatar = file.path;
     await user.save();
 
     res.json({ avatar: user.avatar });
@@ -46,13 +52,27 @@ exports.uploadAvatar = async (req, res) => {
   }
 };
 
-// GET /api/users/search?query=...
 exports.searchUsers = async (req, res) => {
-  const q = req.query.query || "";
-  const users = await User.find({
-    username: { $regex: q, $options: "i" },
-  }).select("username avatar email");
-  res.json(users);
+  try {
+    const q = (req.query.query || "").trim();
+
+    // If search box is empty, return empty array
+    if (!q) {
+      return res.json([]);
+    }
+
+    const users = await User.find({
+      username: {
+        $regex: q,
+        $options: "i",
+      },
+    }).select("username avatar email");
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 // POST /api/users/:id/follow
@@ -87,7 +107,9 @@ exports.unfollowUser = async (req, res) => {
 
   if (!target) return res.status(404).json({ message: "User not found" });
 
-  target.followers = target.followers.filter((f) => String(f) !== String(userId));
+  target.followers = target.followers.filter(
+    (f) => String(f) !== String(userId),
+  );
   user.following = user.following.filter((f) => String(f) !== String(targetId));
 
   await target.save();
@@ -103,4 +125,43 @@ exports.getUserProfile = async (req, res) => {
     .populate("following", "username avatar");
   if (!user) return res.status(404).json({ message: "User not found" });
   res.json(user);
+};
+
+// DELETE /api/users/delete-account
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Delete all posts created by the user
+    await Post.deleteMany({ user: userId });
+
+    // Remove user from followers/following lists
+    await User.updateMany(
+      {},
+      {
+        $pull: {
+          followers: userId,
+          following: userId,
+        },
+      },
+    );
+
+    // Delete chats involving the user
+    await Chat.deleteMany({
+      users: userId,
+    });
+
+    // Delete the user account
+    await User.findByIdAndDelete(userId);
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully.",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 };

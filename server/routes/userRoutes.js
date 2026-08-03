@@ -8,6 +8,7 @@ const {
   followUser,
   unfollowUser,
   getUserProfile,
+  deleteAccount,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload"); // ✅ FIX
@@ -19,6 +20,7 @@ router.post("/avatar", protect, upload.fields([{ name: 'image', maxCount: 1 }, {
 router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);
+router.delete("/delete-account", protect, deleteAccount);
 router.get("/:id/profile", protect, getUserProfile);
 
 module.exports = router;
