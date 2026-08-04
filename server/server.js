@@ -26,9 +26,10 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://pullimedia.vercel.app"],
-    methods: ["GET", "POST"],
+    origin: "https://pullimedia.vercel.app",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
+    allowedHeaders: ["Authorization", "Content-Type"],
   },
 });
 
@@ -109,11 +110,11 @@ io.on("connection", (socket) => {
 ========================= */
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://pullimedia.vercel.app"],
-    credentials: true,
+    origin: "https://pullimedia.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+    credentials: true,
+    allowedHeaders: ["Authorization", "Content-Type"],
+  })
 );
 
 app.options("*", cors());
