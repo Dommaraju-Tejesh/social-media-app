@@ -9,11 +9,7 @@ const storage = new CloudinaryStorage({
 
     return {
       folder: "social-media-posts",
-
-      // Tell Cloudinary whether this is an image or a video
       resource_type: isVideo ? "video" : "image",
-
-      // Allowed file formats
       allowed_formats: [
         "jpg",
         "jpeg",
@@ -29,6 +25,18 @@ const storage = new CloudinaryStorage({
     };
   },
 });
+
+// 👇 Add this OUTSIDE the params() function
+storage._handleFile = ((original) => (req, file, cb) => {
+  console.log("Uploading:", file.originalname);
+
+  original.call(storage, req, file, (err, result) => {
+    console.log("UPLOAD CALLBACK ERROR:", err);
+    console.log("UPLOAD CALLBACK RESULT:", result);
+
+    cb(err, result);
+  });
+})(storage._handleFile);
 
 const upload = multer({ storage });
 
