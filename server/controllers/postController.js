@@ -1,16 +1,34 @@
 const Post = require("../models/Post");
+const streamifier = require("streamifier");
+const cloudinary = require("../config/cloudinary");
 
-// POST /api/posts (protected, Cloudinary upload)
+// POST /api/posts
 exports.createPost = async (req, res) => {
   try {
     const { text } = req.body;
 
     let media = "";
-    let mediaType = "image";
+    let mediaType = "";
 
     if (req.file) {
-      media = req.file.path;
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "social-media-posts",
+            resource_type: req.file.mimetype.startsWith("video/")
+              ? "video"
+              : "image",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
 
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+
+      media = result.secure_url;
       mediaType = req.file.mimetype.startsWith("video/") ? "video" : "image";
     }
 
@@ -19,15 +37,15 @@ exports.createPost = async (req, res) => {
       text,
       media,
       mediaType,
-
-      // Backward compatibility
       image: mediaType === "image" ? media : "",
     });
 
     res.status(201).json(post);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("CREATE POST ERROR:", err);
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 

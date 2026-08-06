@@ -2,6 +2,8 @@ const User = require("../models/User");
 const Post = require("../models/Post");
 const Chat = require("../models/Chat");
 const path = require("path");
+const streamifier = require("streamifier");
+const cloudinary = require("../config/cloudinary");
 
 // GET /api/users/me
 exports.getMe = async (req, res) => {
@@ -27,37 +29,40 @@ exports.updateProfile = async (req, res) => {
 
 exports.uploadAvatar = async (req, res) => {
   try {
-    // Check both possible field names
-    const file =
-      req.files && req.files.image
-        ? req.files.image[0]
-        : req.files && req.files.avatar
-          ? req.files.avatar[0]
-          : req.file;
-
-    if (!file) {
-      return res
-        .status(400)
-        .json({ message: "No file received. Check field names." });
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
     }
 
-    console.log("Selected file =", file);
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "social-media-avatars",
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
 
     const user = await User.findById(req.user._id);
-    user.avatar = file.path;
+
+    user.avatar = result.secure_url;
+
     await user.save();
 
-    res.json({ avatar: user.avatar });
+    res.json({
+      avatar: result.secure_url,
+    });
   } catch (err) {
-    console.error("========== AVATAR ERROR ==========");
     console.error(err);
-    console.error("Message:", err.message);
-    console.error("Stack:", err.stack);
-    console.error("==================================");
-
     res.status(500).json({
-      message: "Server Error",
-      error: err.message,
+      message: err.message,
     });
   }
 };

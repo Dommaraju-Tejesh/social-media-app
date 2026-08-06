@@ -81,15 +81,13 @@ const ProfilePage = () => {
     if (!avatarFile) return;
 
     const formData = new FormData();
-    // Use "image" to match your backend's upload.single("image")
-    formData.append("image", avatarFile);
+    formData.append("avatar", avatarFile);
 
     try {
       await api.post("/users/avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Clear the selection and refresh
       setAvatarFile(null);
       fetchProfile();
       alert("Profile picture updated!");
