@@ -47,8 +47,16 @@ exports.uploadAvatar = async (req, res) => {
 
     res.json({ avatar: user.avatar });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err.message);
-    res.status(500).json({ message: "Server Error", error: err.message });
+    console.error("========== AVATAR ERROR ==========");
+    console.error(err);
+    console.error("Message:", err.message);
+    console.error("Stack:", err.stack);
+    console.error("==================================");
+
+    res.status(500).json({
+      message: "Server Error",
+      error: err.message,
+    });
   }
 };
 
