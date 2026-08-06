@@ -42,7 +42,12 @@ exports.createPost = async (req, res) => {
 
     res.status(201).json(post);
   } catch (err) {
-    console.error("CREATE POST ERROR:", err);
+    console.error("========== CREATE POST ERROR ==========");
+    console.error(err);
+    console.error("Message:", err.message);
+    console.error("Stack:", err.stack);
+    console.error("=======================================");
+
     res.status(500).json({
       message: err.message,
     });

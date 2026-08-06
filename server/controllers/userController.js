@@ -60,7 +60,12 @@ exports.uploadAvatar = async (req, res) => {
       avatar: result.secure_url,
     });
   } catch (err) {
+    console.error("========== AVATAR ERROR ==========");
     console.error(err);
+    console.error("Message:", err.message);
+    console.error("Stack:", err.stack);
+    console.error("==================================");
+
     res.status(500).json({
       message: err.message,
     });
