@@ -10,6 +10,18 @@ const storage = new CloudinaryStorage({
     return {
       folder: "social-media-posts",
       resource_type: isVideo ? "video" : "image",
+      allowed_formats: [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "gif",
+        "mp4",
+        "mov",
+        "avi",
+        "mkv",
+        "webm",
+      ],
     };
   },
 });

@@ -41,6 +41,8 @@ exports.uploadAvatar = async (req, res) => {
         .json({ message: "No file received. Check field names." });
     }
 
+    console.log("Selected file =", file);
+
     const user = await User.findById(req.user._id);
     user.avatar = file.path;
     await user.save();
