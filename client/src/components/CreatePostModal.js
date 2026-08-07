@@ -13,6 +13,7 @@ const CreatePostModal = ({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     if (!image) {
