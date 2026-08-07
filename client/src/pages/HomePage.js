@@ -34,10 +34,19 @@ const HomePage = () => {
       }
     }
   };
+  const fetchFriends = async () => {
+    try {
+      const res = await api.get("/users/friends");
+      setFriends(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (user?._id) {
       fetchPosts();
+      fetchFriends();
     }
   }, [user]);
 

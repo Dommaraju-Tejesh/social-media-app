@@ -190,3 +190,22 @@ exports.deleteAccount = async (req, res) => {
     });
   }
 };
+
+exports.getFriends = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user._id)
+      .populate("following", "username avatar followers")
+      .populate("followers", "_id");
+
+    const friends = currentUser.following.filter((user) =>
+      user.followers.some(
+        (follower) => follower._id.toString() === req.user._id.toString()
+      )
+    );
+
+    res.json(friends);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

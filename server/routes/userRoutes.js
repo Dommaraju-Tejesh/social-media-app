@@ -9,6 +9,7 @@ const {
   unfollowUser,
   getUserProfile,
   deleteAccount,
+  getFriends,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload"); // ✅ FIX
@@ -21,6 +22,7 @@ router.get("/search", protect, searchUsers);
 router.post("/:id/follow", protect, followUser);
 router.post("/:id/unfollow", protect, unfollowUser);
 router.delete("/delete-account", protect, deleteAccount);
+router.get("/friends", protect, getFriends);
 router.get("/:id/profile", protect, getUserProfile);
 
 module.exports = router;
