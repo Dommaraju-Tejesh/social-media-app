@@ -42,7 +42,12 @@ exports.uploadAvatar = async (req, res) => {
           resource_type: "image",
         },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            console.error("CLOUDINARY AVATAR ERROR:");
+            console.dir(error, { depth: null });
+            return reject(error);
+          }
+
           resolve(result);
         },
       );

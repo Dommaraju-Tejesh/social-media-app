@@ -6,7 +6,6 @@ const cloudinary = require("../config/cloudinary");
 exports.createPost = async (req, res) => {
   try {
     const { text } = req.body;
-
     let media = "";
     let mediaType = "";
 
@@ -20,7 +19,12 @@ exports.createPost = async (req, res) => {
               : "image",
           },
           (error, result) => {
-            if (error) return reject(error);
+            if (error) {
+              console.error("CLOUDINARY POST ERROR:");
+              console.dir(error, { depth: null });
+              return reject(error);
+            }
+
             resolve(result);
           },
         );
