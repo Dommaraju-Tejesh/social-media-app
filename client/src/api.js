@@ -7,7 +7,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Attach JWT
+// Attach JWT to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -18,21 +18,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🚫 Global banned-user handler
+// Global response handler
 api.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (
-      error.response &&
-      error.response.status === 403 &&
-      error.response.data?.message === "Account banned"
-    ) {
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
+
+    // JWT expired / invalid / unauthorized
+    if (status === 401) {
+      console.log("Session expired. Redirecting to login...");
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      // Prevent redirect loop if already on login page
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
+    // Banned user
+    if (status === 403 && message === "Account banned") {
       window.location.href = "/banned";
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;
